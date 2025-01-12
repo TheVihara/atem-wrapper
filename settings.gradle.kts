@@ -1,2 +1,2 @@
 rootProject.name = "atem-wrapper"
-include(":api", ":core")
+include(":api", ":core", ":protocol")
