@@ -1,9 +1,7 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.kotlin.dsl.repositories
-import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.api.JavaVersion
 
 plugins {
+    id("java-library")
     id("com.gradleup.shadow") version "9.0.0-beta4" apply false
     kotlin("jvm") version "2.0.20" apply false
 }
