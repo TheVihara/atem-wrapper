@@ -17,4 +17,7 @@ public abstract class AtemDevice {
     Map<String, Object> extraData;
     Integer[] routing;
     Boolean[] outputLocks;
+
+    protected abstract void setRoute(int output, int input);
+    protected abstract void setOutputLock(int output);
 }
