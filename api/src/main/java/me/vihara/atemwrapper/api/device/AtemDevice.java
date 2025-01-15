@@ -1,23 +1,16 @@
 package me.vihara.atemwrapper.api.device;
 
-import lombok.Getter;
-import lombok.experimental.FieldDefaults;
-
 import java.util.Map;
 
-import static lombok.AccessLevel.PRIVATE;
+public interface AtemDevice {
+    float getProtocolVersion();
+    String getModelName();
+    int getVideoInputs();
+    int getVideoOutputs();
+    Map<String, Object> getExtraData();
+    Integer[] getRouting();
+    Boolean[] getOutputLocks();
 
-@FieldDefaults(level = PRIVATE)
-@Getter
-public abstract class AtemDevice {
-    float protocolVersion;
-    String modelName;
-    int videoInputs;
-    int videoOutputs;
-    Map<String, Object> extraData;
-    Integer[] routing;
-    Boolean[] outputLocks;
-
-    protected abstract void setRoute(int output, int input);
-    protected abstract void setOutputLock(int output);
+    void setRoute(int output, int input);
+    void setOutputLock(int output);
 }
