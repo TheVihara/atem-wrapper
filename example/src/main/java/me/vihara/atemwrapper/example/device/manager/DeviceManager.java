@@ -10,7 +10,10 @@ public class DeviceManager {
     private ConcurrentHashMap<Integer, AtemDevice> devices = new ConcurrentHashMap<>();
 
     public void postBootstrap() {
-        devices.put(1, new AtemDeviceImpl());
+        devices.put(1, new AtemDeviceImpl(
+                "0.0.0.0",
+                9990
+        ));
     }
 
     public AtemDevice getDevice(int id) {
