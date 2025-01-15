@@ -1,6 +1,6 @@
 plugins {
     id("java-library")
-    id("io.ktor.plugin") version "3.0.0"
+    id("io.ktor.plugin") version "3.0.3"
 }
 
 apply(plugin = "org.jetbrains.kotlin.jvm")

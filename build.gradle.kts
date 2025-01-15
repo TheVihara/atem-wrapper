@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.kotlin.dsl.repositories
 
 plugins {
@@ -17,9 +18,37 @@ subprojects {
     val customBuildDir: DirectoryProperty = project.layout.buildDirectory
     customBuildDir.set(file("$buildDirectory/${project.name}"))
 
+    apply(plugin = "java-library")
     apply(plugin = "com.gradleup.shadow")
 
     repositories {
         mavenCentral()
+    }
+
+    tasks {
+        withType<ShadowJar> {
+            exclude("META-INF/DEPENDENCIES")
+            exclude("META-INF/LICENSE")
+            exclude("META-INF/LICENSE.txt")
+            exclude("META-INF/NOTICE")
+            exclude("META-INF/NOTICE.txt")
+            exclude("META-INF/maven/**")
+
+            mergeServiceFiles {
+                include("META-INF/impl/**")
+            }
+        }
+
+        withType<JavaCompile> {
+            /*
+                targetCompatibility = JavaVersion.VERSION_23.toString()
+                sourceCompatibility = JavaVersion.VERSION_23.toString()
+            */
+            options.encoding = "UTF-8"
+        }
+
+        named("build") {
+            dependsOn("shadowJar")
+        }
     }
 }
