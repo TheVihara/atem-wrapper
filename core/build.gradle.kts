@@ -5,7 +5,7 @@ plugins {
 
 apply(plugin = "org.jetbrains.kotlin.jvm")
 
-group = "me.vihara.atemwrapper.api"
+group = "me.vihara.atemwrapper.core"
 
 dependencies {
     api(project(":api"))
