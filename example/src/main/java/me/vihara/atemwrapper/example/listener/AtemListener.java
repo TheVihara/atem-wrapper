@@ -1,8 +1,8 @@
 package me.vihara.atemwrapper.example.listener;
 
-import me.vihara.atemwrapper.api.device.event.AtemEventHandler;
-import me.vihara.atemwrapper.api.device.event.AtemEventListener;
-import me.vihara.atemwrapper.api.device.event.impl.AtemRouteChangeEvent;
+import me.vihara.atemwrapper.api.event.AtemEventHandler;
+import me.vihara.atemwrapper.api.event.AtemEventListener;
+import me.vihara.atemwrapper.api.event.impl.AtemRouteChangeEvent;
 
 public class AtemListener implements AtemEventListener {
     @AtemEventHandler
