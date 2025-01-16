@@ -11,7 +11,7 @@ Video outputs: 16
 
 INPUT LABELS:
 0 Label for input 1
-1 Camera 1w
+1 Camera 1
 2 Camera 2
 3 Camera 3
 4 Camera 4

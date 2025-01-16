@@ -1,6 +1,7 @@
 package me.vihara.atemwrapper.core
 
 import me.vihara.atemwrapper.api.device.AtemDevice
+import me.vihara.atemwrapper.api.device.event.impl.AtemRouteChangeEvent
 import me.vihara.atemwrapper.protocol.ProtocolClient
 
 class AtemDeviceImpl(
@@ -44,7 +45,43 @@ class AtemDeviceImpl(
 
     override fun handleData(data: ByteArray) {
         val received = data.decodeToString()
-        println("Received data: $received")
+        val lines = received.split("\n")
+        var currentSection = ""
+        val parsedData = mutableMapOf<String, Any>()
+
+        for (line in lines) {
+            when {
+                line.startsWith("Version:") -> {
+                    parsedData["Version"] = line.split(":")[1].trim()
+                }
+                line.startsWith("Model name:") -> {
+                    parsedData["Model name"] = line.split(":")[1].trim()
+                }
+                line.startsWith("Video inputs:") -> {
+                    parsedData["Video inputs"] = line.split(":")[1].trim().toInt()
+                }
+                line.startsWith("Video outputs:") -> {
+                    parsedData["Video outputs"] = line.split(":")[1].trim().toInt()
+                }
+                line.startsWith("INPUT LABELS:") -> {
+                    currentSection = "INPUT LABELS"
+                    parsedData["Input Labels"] = mutableListOf<String>()
+                }
+                line.startsWith("OUTPUT LABELS:") -> {
+                    currentSection = "OUTPUT LABELS"
+                    parsedData["Output Labels"] = mutableListOf<String>()
+                }
+                currentSection == "INPUT LABELS" -> {
+                    (parsedData["Input Labels"] as MutableList<String>).add(line)
+                }
+                currentSection == "OUTPUT LABELS" -> {
+                    (parsedData["Output Labels"] as MutableList<String>).add(line)
+                }
+            }
+        }
+
+        EventManager.INSTANCE.fireEvent(AtemRouteChangeEvent(1, 2, 3))
+        println("Parsed data: $parsedData")
     }
 
     override fun handleError(e: Throwable) {
