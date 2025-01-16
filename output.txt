@@ -1,0 +1,170 @@
+Received data: PROTOCOL PREAMBLE:
+Version: 2.7
+
+VIDEOHUB DEVICE:
+Device present: true
+Model name: ATEM 2 M/E Constellation HD
+Friendly name: ATEM 2 M/E Constellation HD
+Unique ID: ---
+Video inputs: 45
+Video outputs: 16
+
+INPUT LABELS:
+0 Label for input 1
+1 Camera 1w
+2 Camera 2
+3 Camera 3
+4 Camera 4
+5 Camera 5
+6 SLOW
+7 Camera 7
+8 Camera 8
+9 SLOW1
+10 EXT 2
+11 EXT 3
+12 EXT 4
+13 EXT 5
+14 EXT 6
+15 REC 1
+16 REC 2
+17 REC 3
+18 REC 4
+19 CG FILL
+20 CG KEY
+21 Color Bars
+22 Color 1
+23 Color 2
+24 Media Player 1
+25 Media Player 1 Key
+26 Media Player 2
+27 Media Player 2 Key
+28 ME 1 Key 1 Mask
+29 ME 1 Key 2 Mask
+30 ME 1 Key 3 Mask
+31 ME 1 Key 4 Mask
+32 ME 2 Key 1 Mask
+33 ME 2 Key 2 Mask
+34 ME 2 Key 3 Mask
+35 ME 2 Key 4 Mask
+36 DSK 1 Mask
+37 DSK 2 Mask
+38 SuperSource 1
+39 Clean Feed 1
+40 Clean Feed 2
+41 ME 1
+42 ME 1 PVW
+43 ME 2
+44 ME 2 PVW
+
+VIDEO INPUT STATUS:
+0 Internal
+1 BNC
+2 BNC
+3 BNC
+4 BNC
+5 BNC
+6 BNC
+7 BNC
+8 BNC
+9 BNC
+10 BNC
+11 BNC
+12 BNC
+13 BNC
+14 BNC
+15 BNC
+16 BNC
+17 BNC
+18 BNC
+19 BNC
+20 BNC
+21 Internal
+2
+Received data: 2 Internal
+23 Internal
+24 Internal
+25 Internal
+26 Internal
+27 Internal
+28 Internal
+29 Internal
+30 Internal
+31 Internal
+32 Internal
+33 Internal
+34 Internal
+35 Internal
+36 Internal
+37 Internal
+38 Internal
+39 Internal
+40 Internal
+41 Internal
+42 Internal
+43 Internal
+44 Internal
+
+OUTPUT LABELS:
+0 Output 1
+1 Output 2
+2 Output 3
+3 Output 4
+4 Output 5
+5 Output 6
+6 Output 7
+7 Output 8
+8 Output 9
+9 Output 10
+10 Output 11
+11 Output 12
+12 ME 1
+13 ME 1 PVW
+14 ME 2
+15 ME 2 PVW
+
+CONFIGURATION:
+Video Mode: 1080p50
+
+VIDEO OUTPUT ROUTING:
+0 2
+1 3
+2 0
+3 0
+4 41
+5 41
+6 41
+7 0
+8 41
+9 41
+10 41
+11 3
+12 1
+13 1
+14 1
+15 1
+
+VIDEO OUTPUT LOCKS:
+0 U
+1 U
+2 U
+3 U
+4 U
+5 U
+6 U
+7 U
+8 U
+9 U
+10 U
+11 U
+12 U
+13 U
+14 U
+15 U
+
+END PRELUDE:
+
+
+Jan 16, 2025 8:16:58 AM me.vihara.atemwrapper.example.ExampleApp <init>
+INFO: ExampleApp done (???ms)
+Jan 16, 2025 8:16:58 AM me.vihara.atemwrapper.example.ExampleAppEntrypoint main
+INFO: Entrypoint passed successfully

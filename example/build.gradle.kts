@@ -11,6 +11,10 @@ val output: String = findProperty("output.path")?.toString()
 
 group = "me.vihara.atemwrapper.example"
 
+application {
+    project.setProperty("mainClassName", "me.vihara.atemwrapper.example.ExampleAppEntrypoint")
+}
+
 dependencies {
     implementation(project(":core"))
 

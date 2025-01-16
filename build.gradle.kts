@@ -4,7 +4,7 @@ import org.gradle.kotlin.dsl.repositories
 plugins {
     id("java-library")
     id("com.gradleup.shadow") version "9.0.0-beta4" apply false
-    kotlin("jvm") version "2.0.20" apply false
+    kotlin("jvm") version "2.1.0" apply false
 }
 
 val buildDirectory = file("./build/")
@@ -40,10 +40,8 @@ subprojects {
         }
 
         withType<JavaCompile> {
-            /*
-                targetCompatibility = JavaVersion.VERSION_23.toString()
-                sourceCompatibility = JavaVersion.VERSION_23.toString()
-            */
+            targetCompatibility = JavaVersion.VERSION_23.toString()
+            sourceCompatibility = JavaVersion.VERSION_23.toString()
             options.encoding = "UTF-8"
         }
 
