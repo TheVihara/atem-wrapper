@@ -15,7 +15,11 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
             aSocket(selectorManager).tcp().connect(hostName, port)
         }
 
-        socket?.let { startReading(it) }
+        socket?.let {
+            startReading(it)
+            ping(it)
+        }
+
         return socket!!
     }
 
@@ -40,6 +44,15 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
             } finally {
                 disconnect()
             }
+        }
+    }
+
+    private suspend fun ping(socket: Socket) {
+        val output = socket.openWriteChannel(autoFlush = true)
+
+        while (true) {
+            delay(1000)
+            output.writeStringUtf8("PING\n\n")
         }
     }
 
