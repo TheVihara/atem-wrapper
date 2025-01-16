@@ -1,4 +1,4 @@
-package me.vihara.atemwrapper.api.device.event;
+package me.vihara.atemwrapper.api.event;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
