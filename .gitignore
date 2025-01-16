@@ -2,6 +2,7 @@
 .gradle
 build/
 output/
+**/output/
 */output/*
 !**/output/
 !gradle/wrapper/gradle-wrapper.jar
