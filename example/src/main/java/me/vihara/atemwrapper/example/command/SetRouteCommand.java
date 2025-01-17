@@ -9,7 +9,7 @@ public class SetRouteCommand extends Command {
     @Override
     protected void execute(String[] args) {
         if (args.length < 3) {
-            LOGGER.warning("Usage: SetRouteCommand <device> <output> <input>");
+            LOGGER.warning("Usage: setroute <device> <output> <input>");
             return;
         }
 
@@ -18,5 +18,6 @@ public class SetRouteCommand extends Command {
         int input = Integer.parseInt(args[2]);
 
         AtemDevice atemDevice = DeviceManager.INSTANCE.getDevice(device);
+        atemDevice.setOutputRoute(output, input);
     }
 }
