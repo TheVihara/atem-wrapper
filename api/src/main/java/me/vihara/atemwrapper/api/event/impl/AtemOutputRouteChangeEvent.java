@@ -9,7 +9,7 @@ import me.vihara.atemwrapper.api.event.AtemEvent;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @Getter
-public class AtemRouteChangeEvent implements AtemEvent {
+public class AtemOutputRouteChangeEvent implements AtemEvent {
     int output;
     int oldInput;
     int newInput;

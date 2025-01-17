@@ -2,7 +2,7 @@ package me.vihara.atemwrapper.core
 
 import me.vihara.atemwrapper.api.device.AtemDevice
 import me.vihara.atemwrapper.api.device.AtemLock
-import me.vihara.atemwrapper.api.event.impl.AtemRouteChangeEvent
+import me.vihara.atemwrapper.api.event.impl.AtemOutputRouteChangeEvent
 import me.vihara.atemwrapper.protocol.ProtocolClient
 import java.util.concurrent.ConcurrentHashMap
 
@@ -29,8 +29,35 @@ class AtemDeviceImpl(
     override fun getVideoOutputRouting(): ConcurrentHashMap<Int, Int> = videoOutputRouting
     override fun getVideoOutputLocks(): ConcurrentHashMap<Int, AtemLock> = videoOutputLocks
 
-    override fun setRoute(output: Int, input: Int) {
+    override fun setInputLabel(output: Int, label: String) {
 
+    }
+
+    override fun setOutputLabel(output: Int, label: String) {
+
+    }
+
+    override fun setOutputRoute(output: Int, input: Int) {
+        val oldInput = videoOutputRouting.getOrDefault(output, -1)
+        val command = """
+            VIDEO OUTPUT ROUTING:
+            $output $input
+            
+        """.trimIndent()
+        sendCommand(command) { ack ->
+            if (ack) {
+                println("ACK")
+                EventManager.fireEvent(
+                    AtemOutputRouteChangeEvent(
+                        output,
+                        oldInput,
+                        input
+                    )
+                )
+            } else {
+                println("NAK")
+            }
+        }
     }
 
     override fun setOutputLock(output: Int, lock: AtemLock) {
@@ -74,8 +101,6 @@ class AtemDeviceImpl(
         parsedData.forEach { (section, value) ->
             fieldUpdaters[section]?.invoke(value)
         }
-
-        println(this)
     }
 
     override fun handleError(e: Throwable) {

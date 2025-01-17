@@ -4,10 +4,14 @@ import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 
 abstract class ProtocolClient(private val hostName: String, private val port: Int) {
-    var socket: Socket? = null
-    var readJob: Job? = null
+    private var socket: Socket? = null
+    private var readJob: Job? = null
+    private var writeJob: Job? = null
+    private val writeChannel = Channel<String>(Channel.UNLIMITED)
+    private var ackDeferred: CompletableDeferred<Boolean>? = null
 
     suspend fun connect(): Socket {
         val selectorManager = SelectorManager(Dispatchers.IO)
@@ -17,7 +21,8 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
 
         socket?.let {
             startReading(it)
-            ping(it)
+            startWriting(it)
+            startPing()
         }
 
         return socket!!
@@ -25,6 +30,8 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
 
     fun disconnect() {
         readJob?.cancel()
+        writeJob?.cancel()
+        writeChannel.close()
         socket?.close()
         socket = null
     }
@@ -36,7 +43,7 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
                 while (!isClosedForRead(input)) {
                     val data = input.readAvailable()
                     if (data.isNotEmpty()) {
-                        handleData(data)
+                        processIncomingData(data)
                     }
                 }
             } catch (e: Throwable) {
@@ -47,12 +54,56 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
         }
     }
 
-    private suspend fun ping(socket: Socket) {
+    private fun startWriting(socket: Socket) {
         val output = socket.openWriteChannel(autoFlush = true)
+        writeJob = CoroutineScope(Dispatchers.IO).launch {
+            try {
+                for (message in writeChannel) {
+                    println("Writing $message")
+                    output.writeStringUtf8(message)
+                }
+            } catch (e: Throwable) {
+                handleError(e)
+            }
+        }
+    }
 
+    private fun processIncomingData(data: ByteArray) {
+        val message = data.decodeToString()
+        println("$message je msg")
+        if (message.contains("ACK")) {
+            ackDeferred?.complete(true)
+        } else if (message.contains("NAK")) {
+            ackDeferred?.complete(false)
+        } else {
+            handleData(data)
+        }
+    }
+
+    private suspend fun startPing() {
         while (true) {
             delay(1000)
-            output.writeStringUtf8("PING\n\n")
+            sendCommand("PING:\n\n")
+        }
+    }
+
+    fun sendCommand(block: String) {
+        val termination = if (block.endsWith("\n\n")) "" else "\n"
+        ackDeferred = CompletableDeferred()
+        runBlocking {
+            println("Sending $block")
+            writeChannel.send(block + termination)
+            ackDeferred?.await()
+        }
+    }
+
+    fun sendCommand(block: String, onAck: (Boolean) -> Unit) {
+        val termination = if (block.endsWith("\n\n")) "" else "\n"
+        ackDeferred = CompletableDeferred()
+        runBlocking {
+            writeChannel.send(block + termination)
+            val ackReceived = ackDeferred?.await() ?: false
+            onAck(ackReceived)
         }
     }
 
