@@ -7,7 +7,7 @@ import static me.vihara.atemwrapper.example.ExampleApp.LOGGER;
 
 public class SetRouteCommand extends Command {
     @Override
-    protected void execute(String[] args) {
+    public void execute(String[] args) {
         if (args.length < 3) {
             LOGGER.warning("Usage: setroute <device> <output> <input>");
             return;

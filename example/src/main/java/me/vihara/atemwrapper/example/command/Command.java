@@ -4,5 +4,5 @@ public abstract class Command {
     String name;
     String description;
 
-    protected abstract void execute(String[] args);
+    public abstract void execute(String[] args);
 }

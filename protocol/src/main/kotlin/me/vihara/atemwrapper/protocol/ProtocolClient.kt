@@ -9,34 +9,39 @@ import kotlinx.coroutines.channels.Channel
 
 abstract class ProtocolClient(private val hostName: String, private val port: Int) {
     private var socket: Socket? = null
+    private val pingScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val commandScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var readJob: Job? = null
     private var writeJob: Job? = null
     private var pingJob: Job? = null
     private val writeChannel = Channel<String>(Channel.UNLIMITED)
     private var ackDeferred: CompletableDeferred<Boolean>? = null
 
-    private val pingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    fun connect() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val selectorManager = SelectorManager(Dispatchers.IO)
+            socket = withContext(Dispatchers.IO) {
+                aSocket(selectorManager).tcp().connect(hostName, port)
+            }
 
-    suspend fun connect(): Socket {
-        val selectorManager = SelectorManager(Dispatchers.IO)
-        socket = withContext(Dispatchers.IO) {
-            aSocket(selectorManager).tcp().connect(hostName, port)
+            socket?.let {
+                startReading(it)
+                startWriting(it)
+            }
         }
 
-        socket?.let {
-            startReading(it)
-            startWriting(it)
-        }
-
-        return socket!!
+/*
+        return socket ?: throw IllegalStateException("Socket failed to connect")
+*/
     }
 
     fun disconnect() {
         pingScope.cancel()
+        commandScope.cancel()
+        writeChannel.close()
+        pingJob?.cancel()
         readJob?.cancel()
         writeJob?.cancel()
-        pingJob?.cancel()
-        writeChannel.close()
         socket?.close()
         socket = null
     }
@@ -45,17 +50,14 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
         val input = socket.openReadChannel()
         readJob = CoroutineScope(Dispatchers.IO).launch {
             try {
-                while (!isClosedForRead(input)) {
+                while (!input.isClosedForRead) {
                     val data = input.readAvailable()
                     if (data.isNotEmpty()) {
                         processIncomingData(data)
-                        if (pingJob == null || pingJob?.isActive == false) {
-                            startPing()
-                        }
                     }
                 }
             } catch (e: Throwable) {
-                handleError(e)
+                if (e !is CancellationException) handleError(e)
             } finally {
                 disconnect()
             }
@@ -64,63 +66,67 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
 
     private fun startWriting(socket: Socket) {
         val output = socket.openWriteChannel(autoFlush = true)
+        startPing(socket)
         writeJob = CoroutineScope(Dispatchers.IO).launch {
             try {
                 for (message in writeChannel) {
+                    //println("Writing $message")
                     output.writeStringUtf8(message)
                 }
             } catch (e: Throwable) {
-                handleError(e)
+                if (e !is CancellationException) handleError(e)
             }
         }
     }
 
     private fun processIncomingData(data: ByteArray) {
         val message = data.decodeToString()
-        if (message.contains("ACK")) {
-            ackDeferred?.complete(true)
-        } else if (message.contains("NAK")) {
-            ackDeferred?.complete(false)
-        } else {
-            handleData(data)
+        //println("Received message: $message")
+        when {
+            message.contains("ACK") -> ackDeferred?.complete(true)
+            message.contains("NAK") -> ackDeferred?.complete(false)
+            else -> handleData(data)
         }
     }
 
-    private fun startPing() {
+    private fun startPing(socket: Socket) {
         pingJob = pingScope.launch {
             try {
-                while (isActive) {
+                while (true) {
+                    //println("PINGING")
+                    val ack = sendCommand("PING:\n\n")
+                    //println("Ping result: $ack")
                     delay(1000)
-                    sendCommand("PING:\n\n")
                 }
-            } catch (e: CancellationException) {
-                println("Ping task was cancelled")
             } catch (e: Throwable) {
-                handleError(e)
+                if (e !is CancellationException) handleError(e)
             }
         }
     }
 
-    fun sendCommand(block: String) {
-        val termination = if (block.endsWith("\n\n")) "" else "\n"
+    suspend fun sendCommand(block: String): Boolean {
         ackDeferred = CompletableDeferred()
-        runBlocking {
-            writeChannel.send(block + termination)
-            ackDeferred?.await()
-        }
+        //println("Sending command: $block")
+        writeChannel.send(block)
+        val result = ackDeferred?.await() ?: false
+        //println("Command result: $result")
+        return result
     }
 
     fun sendCommand(block: String, onAck: (Boolean) -> Unit) {
-        val termination = if (block.endsWith("\n\n")) "" else "\n"
         ackDeferred = CompletableDeferred()
-        runBlocking {
-            writeChannel.send(block + termination)
-            val ackReceived = ackDeferred?.await() ?: false
-            onAck(ackReceived)
+        commandScope.launch {
+            try {
+                //println("Sending command: $block")
+                writeChannel.send(block)
+                val ackReceived = ackDeferred?.await() ?: false
+                //println("Command result: $ackReceived")
+                onAck(ackReceived)
+            } catch (e: Throwable) {
+                if (e !is CancellationException) handleError(e)
+            }
         }
     }
-
-    private fun isClosedForRead(input: ByteReadChannel): Boolean = input.isClosedForRead
 
     private suspend fun ByteReadChannel.readAvailable(): ByteArray {
         val buffer = ByteArray(1024)

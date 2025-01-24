@@ -1,12 +1,8 @@
 package me.vihara.atemwrapper.example.device.manager;
 
-import io.ktor.network.sockets.Socket;
-import kotlin.coroutines.EmptyCoroutineContext;
-import kotlinx.coroutines.BuildersKt;
 import me.vihara.atemwrapper.api.device.AtemDevice;
 import me.vihara.atemwrapper.core.AtemDeviceImpl;
 
-import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DeviceManager {
@@ -15,21 +11,35 @@ public class DeviceManager {
 
     public void postBootstrap() {
         AtemDeviceImpl device = new AtemDeviceImpl(
-                "0.0.0.0",
+                "10.200.86.65",
                 9990
         );
 
-        devices.put(1, device);
+        AtemDeviceImpl device2 = new AtemDeviceImpl(
+                "10.200.86.60",
+                9990
+        );
 
-        try {
-            try (Socket socket = BuildersKt.runBlocking(
-                    EmptyCoroutineContext.INSTANCE,
-                    (scope, continuation) -> device.connect(continuation)
-            )) {
-            }
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
-        }
+        AtemDeviceImpl device3 = new AtemDeviceImpl(
+                "10.200.86.47",
+                9990
+        );
+
+        AtemDeviceImpl device4 = new AtemDeviceImpl(
+                "10.200.86.46",
+                9990
+        );
+
+
+        devices.put(1, device);
+        devices.put(2, device2);
+        devices.put(3, device3);
+        devices.put(4, device4);
+
+        device.connect();
+        device2.connect();
+        device3.connect();
+        device4.connect();
     }
 
     public AtemDevice getDevice(int id) {

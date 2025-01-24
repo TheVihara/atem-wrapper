@@ -1,6 +1,6 @@
 package me.vihara.atemwrapper.example.command.listener;
 
-import me.vihara.atemwrapper.example.command.CommandManager;
+import me.vihara.atemwrapper.example.command.manager.CommandManager;
 
 import java.util.Scanner;
 

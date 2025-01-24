@@ -1,4 +1,6 @@
-package me.vihara.atemwrapper.example.command;
+package me.vihara.atemwrapper.example.command.manager;
+
+import me.vihara.atemwrapper.example.command.Command;
 
 import java.util.HashMap;
 import java.util.Map;

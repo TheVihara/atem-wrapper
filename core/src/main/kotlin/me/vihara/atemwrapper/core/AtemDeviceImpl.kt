@@ -42,6 +42,7 @@ class AtemDeviceImpl(
         val command = """
             VIDEO OUTPUT ROUTING:
             $output $input
+            
         """.trimIndent()
         sendCommand(command) { ack ->
             if (ack) {

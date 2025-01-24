@@ -1,10 +1,10 @@
 package me.vihara.atemwrapper.example;
 
 import me.vihara.atemwrapper.core.EventManager;
-import me.vihara.atemwrapper.example.command.CommandManager;
 import me.vihara.atemwrapper.example.command.Command;
 import me.vihara.atemwrapper.example.command.SetRouteCommand;
 import me.vihara.atemwrapper.example.command.listener.CommandListener;
+import me.vihara.atemwrapper.example.command.manager.CommandManager;
 import me.vihara.atemwrapper.example.device.manager.DeviceManager;
 import me.vihara.atemwrapper.example.listener.AtemListener;
 
