@@ -9,8 +9,6 @@ plugins {
 val output: String = findProperty("output.path")?.toString()
     ?: "./output/"
 
-group = "me.vihara.atemwrapper.example"
-
 application {
     project.setProperty("mainClassName", "me.vihara.atemwrapper.example.ExampleAppEntrypoint")
 }
@@ -30,7 +28,7 @@ tasks {
         }
     }
 
-    named<ShadowJar>("shadowJar") {
+    withType<ShadowJar> {
         archiveBaseName.set("ExampleApp")
         archiveClassifier.set("")
         archiveVersion.set("")

@@ -5,8 +5,10 @@ plugins {
 
 apply(plugin = "org.jetbrains.kotlin.jvm")
 
-group = "io.github.thevihara.atemwrapper.protocol"
-
 dependencies {
     api("io.ktor:ktor-server-netty")
+}
+
+application {
+    mainClass.set("")
 }

@@ -6,7 +6,7 @@ import me.vihara.atemwrapper.api.event.impl.AtemOutputRouteChangeEvent
 import me.vihara.atemwrapper.protocol.ProtocolClient
 import java.util.concurrent.ConcurrentHashMap
 
-class AtemDeviceImpl(
+open class AtemDeviceImpl(
     hostName: String,
     port: Int
 ) : ProtocolClient(hostName, port), AtemDevice {

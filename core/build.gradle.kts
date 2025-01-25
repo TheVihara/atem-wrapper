@@ -5,9 +5,11 @@ plugins {
 
 apply(plugin = "org.jetbrains.kotlin.jvm")
 
-group = "io.github.thevihara.core"
-
 dependencies {
     api(project(":api"))
     api(project(":protocol"))
+}
+
+application {
+    mainClass.set("")
 }
