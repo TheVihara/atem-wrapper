@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-group = "me.vihara.atemwrapper.api"
+group = "io.github.thevihara.atemwrapper.api"
 
 dependencies {
     compileOnly("org.jetbrains:annotations:26.0.1")
