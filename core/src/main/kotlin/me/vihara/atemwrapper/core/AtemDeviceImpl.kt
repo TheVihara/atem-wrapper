@@ -2,6 +2,7 @@ package me.vihara.atemwrapper.core
 
 import me.vihara.atemwrapper.api.device.AtemDevice
 import me.vihara.atemwrapper.api.device.AtemLock
+import me.vihara.atemwrapper.api.device.AtemStatus
 import me.vihara.atemwrapper.api.event.impl.AtemOutputRouteChangeEvent
 import me.vihara.atemwrapper.protocol.ProtocolClient
 import java.util.concurrent.ConcurrentHashMap
@@ -11,6 +12,7 @@ open class AtemDeviceImpl(
     port: Int
 ) : ProtocolClient(hostName, port), AtemDevice {
 
+    private var status: AtemStatus = AtemStatus.DISCONNECTED
     private var protocolVersion: Float = 0f
     private var info: AtemDevice.Info = AtemDevice.Info()
     private var configuration: String = ""
@@ -20,6 +22,7 @@ open class AtemDeviceImpl(
     private var videoOutputRouting: ConcurrentHashMap<Int, Int> = ConcurrentHashMap()
     private var videoOutputLocks: ConcurrentHashMap<Int, AtemLock> = ConcurrentHashMap()
 
+    override fun getStatus(): AtemStatus? = status
     override fun getProtocolVersion(): Float = protocolVersion
     override fun getInfo(): AtemDevice.Info = info
     override fun getConfiguration(): String = configuration
@@ -62,6 +65,18 @@ open class AtemDeviceImpl(
 
     override fun setOutputLock(output: Int, lock: AtemLock) {
 
+    }
+
+    override fun onConnect() {
+        status = AtemStatus.CONNECTED
+    }
+
+    override fun onDisconnect() {
+        status = AtemStatus.DISCONNECTED
+    }
+
+    override fun onError(e: Throwable) {
+        status = AtemStatus.ERROR
     }
 
     override fun handleData(data: ByteArray) {

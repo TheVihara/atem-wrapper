@@ -9,6 +9,7 @@ import java.util.Map;
 import static lombok.AccessLevel.PRIVATE;
 
 public interface AtemDevice {
+    AtemStatus getStatus();
     float getProtocolVersion();
     Info getInfo();
     String getConfiguration();

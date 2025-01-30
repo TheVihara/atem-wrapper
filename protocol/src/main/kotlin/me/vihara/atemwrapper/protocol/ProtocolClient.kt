@@ -17,6 +17,10 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
     private val writeChannel = Channel<String>(Channel.UNLIMITED)
     private var ackDeferred: CompletableDeferred<Boolean>? = null
 
+    abstract fun onConnect()
+    abstract fun onDisconnect()
+    abstract fun onError(e: Throwable)
+
     fun connect() {
         CoroutineScope(Dispatchers.IO).launch {
             val selectorManager = SelectorManager(Dispatchers.IO)
@@ -27,12 +31,13 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
             socket?.let {
                 startReading(it)
                 startWriting(it)
+                onConnect()
             }
         }
 
-/*
-        return socket ?: throw IllegalStateException("Socket failed to connect")
-*/
+        /*
+                return socket ?: throw IllegalStateException("Socket failed to connect")
+        */
     }
 
     fun disconnect() {
@@ -44,6 +49,7 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
         writeJob?.cancel()
         socket?.close()
         socket = null
+        onDisconnect()
     }
 
     private fun startReading(socket: Socket) {
@@ -57,7 +63,10 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
                     }
                 }
             } catch (e: Throwable) {
-                if (e !is CancellationException) handleError(e)
+                if (e !is CancellationException) {
+                    handleError(e)
+                    onError(e)
+                }
             } finally {
                 disconnect()
             }
@@ -74,7 +83,10 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
                     output.writeStringUtf8(message)
                 }
             } catch (e: Throwable) {
-                if (e !is CancellationException) handleError(e)
+                if (e !is CancellationException) {
+                    handleError(e)
+                    onError(e)
+                }
             }
         }
     }
@@ -99,7 +111,10 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
                     delay(1000)
                 }
             } catch (e: Throwable) {
-                if (e !is CancellationException) handleError(e)
+                if (e !is CancellationException) {
+                    handleError(e)
+                    onError(e)
+                }
             }
         }
     }
@@ -123,7 +138,10 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
                 //println("Command result: $ackReceived")
                 onAck(ackReceived)
             } catch (e: Throwable) {
-                if (e !is CancellationException) handleError(e)
+                if (e !is CancellationException) {
+                    handleError(e)
+                    onError(e)
+                }
             }
         }
     }
