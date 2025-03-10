@@ -10,9 +10,9 @@ import me.vihara.atemwrapper.api.event.AtemEvent;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @Getter
-public class AtemOutputRouteChangeEvent implements AtemEvent {
+public class AtemOutputLabelChangeEvent implements AtemEvent {
     AtemDevice device;
     int output;
-    int oldInput;
-    int newInput;
+    String oldLabel;
+    String newLabel;
 }

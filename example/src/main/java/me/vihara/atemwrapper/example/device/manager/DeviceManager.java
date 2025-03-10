@@ -37,9 +37,12 @@ public class DeviceManager {
         devices.put(4, device4);
 
         device.connect();
-        device2.connect();
+       /* device2.connect();
         device3.connect();
-        device4.connect();
+        device4.connect();*/
+
+
+        System.out.println("INFOOO " + device);
     }
 
     public AtemDevice getDevice(int id) {

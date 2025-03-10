@@ -19,7 +19,7 @@ public interface AtemDevice {
     Map<Integer, Integer> getVideoOutputRouting();
     Map<Integer, AtemLock> getVideoOutputLocks();
 
-    void setInputLabel(int output, String label);
+    void setInputLabel(int input, String label);
     void setOutputLabel(int output, String label);
     void setOutputRoute(int output, int input);
     void setOutputLock(int output, AtemLock lock);

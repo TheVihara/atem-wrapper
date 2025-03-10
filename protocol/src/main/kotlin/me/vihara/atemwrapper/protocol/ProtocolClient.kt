@@ -3,11 +3,11 @@ package me.vihara.atemwrapper.protocol
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
-import io.ktor.utils.io.CancellationException
 import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 
-abstract class ProtocolClient(private val hostName: String, private val port: Int) {
+abstract class ProtocolClient(private val hostName: String?, private val port: Int?) {
     private var socket: Socket? = null
     private val pingScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val commandScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -17,29 +17,52 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
     private val writeChannel = Channel<String>(Channel.UNLIMITED)
     private var ackDeferred: CompletableDeferred<Boolean>? = null
 
+    /**
+     * Called when the client successfully connects to the server.
+     */
     abstract fun onConnect()
+
+    /**
+     * Called when the client disconnects from the server.
+     */
     abstract fun onDisconnect()
+
+    /**
+     * Called when an error occurs during communication with the server.
+     */
     abstract fun onError(e: Throwable)
 
+    /**
+     * Connects to the server using the provided host name and port.
+     */
     fun connect() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val selectorManager = SelectorManager(Dispatchers.IO)
-            socket = withContext(Dispatchers.IO) {
-                aSocket(selectorManager).tcp().connect(hostName, port)
-            }
-
-            socket?.let {
-                startReading(it)
-                startWriting(it)
-                onConnect()
-            }
+        if (hostName == null || port == null) {
+            println("Host name or port is null")
+            return
         }
 
-        /*
-                return socket ?: throw IllegalStateException("Socket failed to connect")
-        */
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val selectorManager = SelectorManager(Dispatchers.IO)
+                socket = aSocket(selectorManager).tcp().connect(hostName, port)
+
+                socket?.let {
+                    startReading(it)
+                    startWriting(it)
+                    onConnect()
+                }
+            } catch (e: Throwable) {
+                if (e !is CancellationException) {
+                    handleError(e)
+                    onError(e)
+                }
+            }
+        }
     }
 
+    /**
+     * Disconnects from the server and cleans up resources.
+     */
     fun disconnect() {
         pingScope.cancel()
         commandScope.cancel()
@@ -52,6 +75,9 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
         onDisconnect()
     }
 
+    /**
+     * Starts reading data from the socket.
+     */
     private fun startReading(socket: Socket) {
         val input = socket.openReadChannel()
         readJob = CoroutineScope(Dispatchers.IO).launch {
@@ -73,13 +99,15 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
         }
     }
 
+    /**
+     * Starts writing data to the socket.
+     */
     private fun startWriting(socket: Socket) {
         val output = socket.openWriteChannel(autoFlush = true)
         startPing(socket)
         writeJob = CoroutineScope(Dispatchers.IO).launch {
             try {
                 for (message in writeChannel) {
-                    //println("Writing $message")
                     output.writeStringUtf8(message)
                 }
             } catch (e: Throwable) {
@@ -91,6 +119,9 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
         }
     }
 
+    /**
+     * Processes incoming data from the socket.
+     */
     private fun processIncomingData(data: ByteArray) {
         val message = data.decodeToString()
         //println("Received message: $message")
@@ -101,13 +132,14 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
         }
     }
 
+    /**
+     * Starts sending periodic PING messages to the server.
+     */
     private fun startPing(socket: Socket) {
         pingJob = pingScope.launch {
             try {
                 while (true) {
-                    //println("PINGING")
                     val ack = sendCommand("PING:\n\n")
-                    //println("Ping result: $ack")
                     delay(1000)
                 }
             } catch (e: Throwable) {
@@ -119,23 +151,24 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
         }
     }
 
+    /**
+     * Sends a command to the server and waits for an acknowledgment.
+     */
     suspend fun sendCommand(block: String): Boolean {
         ackDeferred = CompletableDeferred()
-        //println("Sending command: $block")
         writeChannel.send(block)
-        val result = ackDeferred?.await() ?: false
-        //println("Command result: $result")
-        return result
+        return ackDeferred?.await() ?: false
     }
 
+    /**
+     * Sends a command to the server and invokes a callback when an acknowledgment is received.
+     */
     fun sendCommand(block: String, onAck: (Boolean) -> Unit) {
         ackDeferred = CompletableDeferred()
         commandScope.launch {
             try {
-                //println("Sending command: $block")
                 writeChannel.send(block)
                 val ackReceived = ackDeferred?.await() ?: false
-                //println("Command result: $ackReceived")
                 onAck(ackReceived)
             } catch (e: Throwable) {
                 if (e !is CancellationException) {
@@ -146,15 +179,24 @@ abstract class ProtocolClient(private val hostName: String, private val port: In
         }
     }
 
+    /**
+     * Reads available data from the channel.
+     */
     private suspend fun ByteReadChannel.readAvailable(): ByteArray {
         val buffer = ByteArray(1024)
         val bytesRead = readAvailable(buffer)
         return if (bytesRead > 0) buffer.copyOf(bytesRead) else byteArrayOf()
     }
 
-    protected abstract fun handleData(data: ByteArray)
-
+    /**
+     * Handles errors that occur during communication with the server.
+     */
     protected open fun handleError(e: Throwable) {
         println("Error occurred: ${e.message}")
     }
+
+    /**
+     * Processes incoming data based on the protocol.
+     */
+    protected abstract fun handleData(data: ByteArray)
 }
