@@ -124,7 +124,7 @@ abstract class ProtocolClient(private val hostName: String?, private val port: I
      */
     private fun processIncomingData(data: ByteArray) {
         val message = data.decodeToString()
-        //println("Received message: $message")
+
         when {
             message.contains("ACK") -> ackDeferred?.complete(true)
             message.contains("NAK") -> ackDeferred?.complete(false)

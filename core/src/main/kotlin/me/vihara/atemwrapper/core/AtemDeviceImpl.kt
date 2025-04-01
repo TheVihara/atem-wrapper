@@ -231,7 +231,7 @@ open class AtemDeviceImpl(
                 val event = AtemOutputRouteChangeEvent(
                     this,
                     it.key,
-                    videoOutputRouting.get(it.key)!!,
+                    videoOutputRouting.getOrDefault(it.key, -1),
                     it.value
                 )
 
@@ -249,7 +249,7 @@ open class AtemDeviceImpl(
                 val event = AtemOutputLabelChangeEvent(
                     this,
                     it.key,
-                    outputLabels.get(it.key)!!,
+                    outputLabels.getOrDefault(it.key, "None"),
                     it.value
                 )
 
@@ -267,7 +267,7 @@ open class AtemDeviceImpl(
                 val event = AtemInputLabelChangeEvent(
                     this,
                     it.key,
-                    inputLabels.get(it.key)!!,
+                    inputLabels.getOrDefault(it.key, "None"),
                     it.value
                 )
 
@@ -285,7 +285,7 @@ open class AtemDeviceImpl(
                 val event = AtemLockChangeEvent(
                     this,
                     it.key,
-                    videoOutputLocks.get(it.key)!!,
+                    videoOutputLocks.getOrDefault(it.key, AtemLock.LOCKED),
                     it.value
                 )
 
