@@ -116,12 +116,12 @@ open class AtemDeviceImpl(
     override fun setOutputLock(output: Int, lock: AtemLock) {
         val oldLock = videoOutputLocks.getOrDefault(output, AtemLock.LOCKED)
         val forceCommand = """
-            INPUT LABELS:
+            VIDEO OUTPUT LOCKS:
             $output F
             
         """.trimIndent()
         val actualCommand = """
-            INPUT LABELS:
+            VIDEO OUTPUT LOCKS:
             $output ${lock.id}
             
         """.trimIndent()
