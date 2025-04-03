@@ -114,9 +114,10 @@ open class AtemDeviceImpl(
     }
 
     override fun setOutputLock(output: Int, lock: AtemLock) {
+        println("LOCKING OR SUM")
         val oldLock = videoOutputLocks.getOrDefault(output, AtemLock.LOCKED)
         val forceCommand = """
-            VIDEO OUTPUT LOCKS:
+            SERIAL PORT LOCKS:
             $output F
             
         """.trimIndent()
@@ -125,10 +126,21 @@ open class AtemDeviceImpl(
             $output ${lock.id}
             
         """.trimIndent()
-        sendCommand(forceCommand) { ack ->
+        println("SENDING CMD")
+        sendCommand(actualCommand) { ack ->
+            println("test")
             if (ack) {
+                println("ACk")
+                EventManager.fireEvent(
+                    AtemLockChangeEvent(
+                        this,
+                        output,
+                        oldLock,
+                        lock
+                    )
+                )
                 //println("ACK")
-                sendCommand(actualCommand) { ack ->
+/*                sendCommand(actualCommand) { ack ->
                     if (ack) {
                         //println("ACK")
                         EventManager.fireEvent(
@@ -142,7 +154,7 @@ open class AtemDeviceImpl(
                     } else {
                         //println("NAK")
                     }
-                }
+                }*/
             } else {
                 //println("NAK")
             }
@@ -205,6 +217,10 @@ open class AtemDeviceImpl(
 
     override fun handleError(e: Throwable) {
         println("Protocol error: ${e.message}")
+    }
+
+    public fun test() {
+
     }
 
     fun String.isUppercase(): Boolean {
